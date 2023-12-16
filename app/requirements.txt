@@ -1,0 +1,7 @@
+fastapi
+uvicorn[standard]
+Pillow
+numpy
+mangum
+python-dotenv
+python-multipart

@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+venv/
+
+# IDEs and Editors
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.komodoproject
+.komodotools/
+.eclim/
+.classpath
+.project
+.settings/
+.tmproj
+.nbproject/
+*.launch
+.c9/
+.cproject
+.pydevproject
+.pycharm/
+.vs/
+
+# Testing
+htmlcov/
+.coverage
+.tox/
+.noseids
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Build and Distribution
+build/
+dist/
+*.egg-info/
+*.egg
+*.egg-info
+*.egg-info/
+*.spec
+*.dist-info/
+*.dist-info/
+*.dist-info/*
+*.dist/
+*.build/
