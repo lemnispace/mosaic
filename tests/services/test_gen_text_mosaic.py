@@ -52,7 +52,3 @@ def test_gen_text_mosaic(sample_image):
     result_img = gen_text_mosaic(TEST_TEXT, sample_image, TEST_TARGET_WIDTH)
     assert result_img.size[0] == TEST_TARGET_WIDTH
     assert result_img.size[1] == get_target_height(sample_image, TEST_TARGET_WIDTH)
-
-
-# Test that the text is actually drawn on the image could be complex since we would need to analyze the image content.
-# One approach could be to check the pixel values at expected text positions to see if they have changed from the base image.
