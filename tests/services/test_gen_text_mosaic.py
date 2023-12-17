@@ -1,6 +1,10 @@
 import pytest
 from PIL import Image, ImageFont, ImageDraw
-import app.services.gen_text_mosaic as mosaic
+from app.services.gen_text_mosaic import (
+    get_target_height,
+    pre_process_text,
+    gen_text_mosaic,
+)
 
 # Constants for the test
 TEST_TARGET_WIDTH = 100
@@ -28,14 +32,14 @@ def sample_draw(sample_image):
 
 
 def test_get_target_height(sample_image):
-    target_height = mosaic.get_target_height(sample_image, TEST_TARGET_WIDTH)
+    target_height = get_target_height(sample_image, TEST_TARGET_WIDTH)
     assert (
         target_height == (TEST_TARGET_WIDTH * sample_image.height) // sample_image.width
     )
 
 
 def test_pre_process_text(sample_draw, sample_font):
-    processed_text = mosaic.pre_process_text(
+    processed_text = pre_process_text(
         sample_draw, TEST_TEXT, sample_font, TEST_TARGET_WIDTH, 50
     )
     assert isinstance(processed_text, str)
@@ -45,11 +49,9 @@ def test_pre_process_text(sample_draw, sample_font):
 
 
 def test_gen_text_mosaic(sample_image):
-    result_img = mosaic.gen_text_mosaic(TEST_TEXT, sample_image, TEST_TARGET_WIDTH)
+    result_img = gen_text_mosaic(TEST_TEXT, sample_image, TEST_TARGET_WIDTH)
     assert result_img.size[0] == TEST_TARGET_WIDTH
-    assert result_img.size[1] == mosaic.get_target_height(
-        sample_image, TEST_TARGET_WIDTH
-    )
+    assert result_img.size[1] == get_target_height(sample_image, TEST_TARGET_WIDTH)
 
 
 # Test that the text is actually drawn on the image could be complex since we would need to analyze the image content.
