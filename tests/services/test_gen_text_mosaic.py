@@ -4,6 +4,7 @@ from app.services.gen_text_mosaic import (
     get_target_height,
     pre_process_text,
     gen_text_mosaic,
+    get_font,
 )
 
 # Constants for the test
@@ -52,3 +53,18 @@ def test_gen_text_mosaic(sample_image):
     result_img = gen_text_mosaic(TEST_TEXT, sample_image, TEST_TARGET_WIDTH)
     assert result_img.size[0] == TEST_TARGET_WIDTH
     assert result_img.size[1] == get_target_height(sample_image, TEST_TARGET_WIDTH)
+
+
+def test_get_font():
+    tests = [
+        {"default_font_size": 10, "img_width": 2048, "expected_font_size": 15},
+        {"default_font_size": 10, "img_width": 512, "expected_font_size": 7},
+        {"default_font_size": 123, "img_width": 1024, "expected_font_size": 123},
+        {"default_font_size": 10, "img_width": 1080, "expected_font_size": 15},
+        {"default_font_size": 10, "img_width": 200, "expected_font_size": 5},
+        {"default_font_size": 10, "img_width": 4080, "expected_font_size": 30},
+    ]
+    for test in tests:
+        font = get_font(test["img_width"], test["default_font_size"])
+        assert isinstance(font, ImageFont.FreeTypeFont)
+        assert font.size == test["expected_font_size"]
