@@ -51,3 +51,6 @@ dist/
 *.dist-info/*
 *.dist/
 *.build/
+
+# OS
+.DS_Store
