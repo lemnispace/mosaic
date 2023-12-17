@@ -35,7 +35,7 @@ def gen_text_mosaic(
     return txt_img
 
 
-def get_font(img_width: int, default_font_size=12):
+def get_font(img_width: int, default_font_size=14):
     # determine the best font size based on the target image size
     # we'll use resolution based scaling to determine the font size
     if img_width >= 2160:
