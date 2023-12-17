@@ -3,9 +3,11 @@ import re
 from PIL import ImageFont, ImageDraw
 
 
-def get_absolute_path(relative_path: str):
+def get_absolute_path(relative_path: str, base_path: Path = None):
     """Returns the absolute path of a file given its relative path."""
-    abs_path = Path(__file__).parent / relative_path
+    if base_path is None:
+        base_path = Path(__file__).parent
+    abs_path = base_path / relative_path
     abs_path = abs_path.resolve()
     if not abs_path.is_file():
         raise FileNotFoundError(f"File not found: {abs_path}")
