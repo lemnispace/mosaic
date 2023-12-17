@@ -45,12 +45,25 @@ async def mosaic(
     width: Optional[int] = Form(
         3840, description="Desired width of the generated mosaic image"
     ),
+    base_font_size: Optional[int] = Form(
+        14,
+        description="Base font size to use for the mosaic. The actual font size will be scaled based on the image size.",
+    ),
+    is_black_and_white: Optional[bool] = Form(
+        True, description="Whether to generate a black and white mosaic"
+    ),
     file: UploadFile = File(..., description="Image to use for the mosaic"),
 ):
     img = await load_image_file(file)
     if img is None:
         return JSONResponse(status_code=400, content={"message": "Invalid image"})
-    text_mosaic = gen_text_mosaic(text, img, width)
+    text_mosaic = gen_text_mosaic(
+        text,
+        img,
+        target_width=width,
+        text_size=base_font_size,
+        is_black_and_white=is_black_and_white,
+    )
     img_bytes = image_to_bytes(text_mosaic)
     img_bytes.seek(0)
     # Return the image directly as a response

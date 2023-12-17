@@ -2,7 +2,9 @@ from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageEnhance
 from utils.util import get_absolute_path, clean_text, get_charsize
 
 
-def gen_text_mosaic(text: str, img: Image, target_width=3840):
+def gen_text_mosaic(
+    text: str, img: Image, target_width=3840, text_size=14, is_black_and_white=True
+):
     """
     Generate a text mosaic image by repeating the given text to fill the image.
     The output image will be resized to the target width while maintaining the aspect ratio.
@@ -19,24 +21,23 @@ def gen_text_mosaic(text: str, img: Image, target_width=3840):
     target_height = get_target_height(img, target_width)
     img = img.resize((target_width, target_height), Image.Resampling.LANCZOS)
 
-    font = get_font(target_width)
+    font = get_font(target_width, text_size)
     # Pre-process the image (apply edge enhancement)
-    image, edge_img, txt_img = pre_process_img(img)
+    image, txt_img = pre_process_img(img, is_black_and_white)
     # Create a drawing context for the text image
     draw = ImageDraw.Draw(txt_img)
     # Pre-process the text
     text = pre_process_text(draw, text, font, target_width, target_height)
     # Generate the text mosaic
-    gen_mosaic(image, edge_img, text, font, draw)
+    gen_mosaic(image, text, font, draw)
 
     # Return the text image
     return txt_img
 
 
-def get_font(img_width: int):
+def get_font(img_width: int, default_font_size=12):
     # determine the best font size based on the target image size
     # we'll use resolution based scaling to determine the font size
-    default_font_size = 8
     if img_width >= 2160:
         font_size = default_font_size * 3
     elif img_width >= 1080:
@@ -47,7 +48,7 @@ def get_font(img_width: int):
         font_size = default_font_size * 0.75
     else:
         font_size = default_font_size
-    font_path = str(get_absolute_path("../fonts/RobotoMono-Regular.ttf"))
+    font_path = str(get_absolute_path("../fonts/NotoSansMono-Black.ttf"))
     font = ImageFont.truetype(font_path, int(font_size))
 
     return font
@@ -100,7 +101,10 @@ def pre_process_text(
     return text
 
 
-def pre_process_img(init_img):
+def pre_process_img(
+    init_img,
+    is_black_and_white=True,
+):
     """
     Pre-processes the input image by applying an edge enhancement filter.
 
@@ -113,14 +117,15 @@ def pre_process_img(init_img):
     # Convert to RGBA if necessary to ensure it's in the correct mode
     img = init_img.convert("RGBA")
     img = increase_contrast(img)
-    edge_img = apply_edge_detection(img)
+    if is_black_and_white:
+        img = apply_black_and_white_filter(img)
     # Create a new image for the text overlay with a transparent background
     txt_img = Image.new("RGBA", img.size, (255, 255, 255, 0))
 
-    return img, edge_img, txt_img
+    return img, txt_img
 
 
-def increase_contrast(img):
+def increase_contrast(img: Image):
     """
     Increase the contrast of the image to make the subject more pronounced.
 
@@ -131,29 +136,27 @@ def increase_contrast(img):
         PIL.Image.Image: The image with increased contrast.
     """
     enhancer = ImageEnhance.Contrast(img)
-    return enhancer.enhance(2.0)  # Increase contrast; adjust the factor as needed
+    return enhancer.enhance(2.0)
 
 
-def apply_edge_detection(img):
+def apply_black_and_white_filter(img: Image):
     """
-    Apply edge detection filter to the image.
+    Apply a black and white filter to the image.
 
     Args:
         img (PIL.Image.Image): The input image.
 
     Returns:
-        PIL.Image.Image: The image with edge detection applied.
+        PIL.Image.Image: The image with the black and white filter applied.
     """
-    edges = img.filter(ImageFilter.FIND_EDGES)
-    return increase_contrast(edges)
+    return ImageEnhance.Color(img).enhance(0.0)
 
 
 def gen_mosaic(
     img: Image,
-    edge_img: Image,
     text: str,
     font: ImageFont.FreeTypeFont,
-    draw: ImageDraw,
+    draw: ImageDraw.ImageDraw,
 ):
     """
     Generates a text mosaic by overlaying the given text onto the image.
@@ -171,19 +174,22 @@ def gen_mosaic(
 
     # add padding to the character
     char_height = int(char_height * 1.5)
+    x_offset = char_width // 2
+    y_offset = char_height // 2
 
     # Use the edge image for edge detection but the original image for color
-    for y in range(0, img.size[1], char_height):
-        for x in range(0, img.size[0], char_width):
+    for y in range(y_offset, img.size[1], char_height):
+        for x in range(x_offset, img.size[0], char_width):
             if text_position >= max_text_len:
                 text_position = 0
 
+            # Check the alpha value of the pixel; skip if transparent
+            if img.mode == "RGBA":
+                r, g, b, a = img.getpixel((x, y))
+                if a == 0:  # Completely transparent pixel
+                    continue
+
             # Use color from the original image, not the edge-detected image
             pixel_color = img.getpixel((x, y))
-            edge_pixel_value = edge_img.getpixel((x, y))
-            is_edge = (
-                max(edge_pixel_value) > 128
-            )  # Determine if the pixel is part of an edge
-            text_color = pixel_color if not is_edge else (0, 0, 0, 255)
-            draw.text((x, y), text[text_position], font=font, fill=text_color)
+            draw.text((x, y), text[text_position], font=font, fill=pixel_color)
             text_position += 1
