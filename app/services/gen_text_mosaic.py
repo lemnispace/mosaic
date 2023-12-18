@@ -1,4 +1,4 @@
-from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageEnhance
+from PIL import Image, ImageDraw, ImageFont, ImageEnhance
 from utils.util import get_absolute_path, clean_text, get_charsize
 
 
@@ -136,7 +136,7 @@ def increase_contrast(img: Image):
         PIL.Image.Image: The image with increased contrast.
     """
     enhancer = ImageEnhance.Contrast(img)
-    return enhancer.enhance(2.0)
+    return enhancer.enhance(1.5)
 
 
 def apply_black_and_white_filter(img: Image):
