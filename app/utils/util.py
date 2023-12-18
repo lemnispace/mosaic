@@ -1,6 +1,8 @@
+from PIL import ImageFont, ImageDraw
+from PIL.Image import Image
 from pathlib import Path
 import re
-from PIL import ImageFont, ImageDraw
+import io
 
 
 def get_absolute_path(relative_path: str, base_path: Path = None):
@@ -47,3 +49,18 @@ def get_charsize(
     char_width = char_size[2] - char_size[0]
     char_height = char_size[3] - char_size[1]
     return char_width, char_height
+
+
+def image_to_bytes(image: Image, format: str = "PNG"):
+    """
+    Converts a PIL image to a byte array.
+
+    Args:
+        image: The PIL image to be converted.
+
+    Returns:
+        The byte array representation of the image.
+    """
+    img_byte_arr = io.BytesIO()
+    image.save(img_byte_arr, format=format)
+    return img_byte_arr

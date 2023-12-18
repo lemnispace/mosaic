@@ -1,10 +1,16 @@
 from fastapi.middleware.cors import CORSMiddleware
-from utils.server_util import image_to_bytes, load_image_file
+from utils.server_util import (
+    load_image_file,
+    get_asgi_handler,
+    get_stage,
+)
+from utils.config import get_env_variable, configure_logging
+from utils.util import image_to_bytes
 from services.gen_text_mosaic import gen_text_mosaic
 from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi import FastAPI, Request, UploadFile, File, Form
 from typing import Optional
-from utils.config import get_env_variable, configure_logging
+import json
 
 app = FastAPI(
     title="Text Mosaic API",
@@ -39,7 +45,7 @@ async def universal_exception_handler(request: Request, exc: Exception):
     return JSONResponse(status_code=500, content={"message": "Internal Server Error"})
 
 
-@app.post("/mosaic")
+@app.post("/")
 async def mosaic(
     text: str = Form(..., description="Text to use for the mosaic"),
     width: Optional[int] = Form(
@@ -64,7 +70,39 @@ async def mosaic(
         text_size=base_font_size,
         is_black_and_white=is_black_and_white,
     )
-    img_bytes = image_to_bytes(text_mosaic)
+    img_bytes = image_to_bytes(text_mosaic, format="PNG")
     img_bytes.seek(0)
     # Return the image directly as a response
     return StreamingResponse(img_bytes, media_type="image/png")
+
+
+def handler(event, context):
+    """
+    Lambda handler function for the API.
+
+    Args:
+        event: The event data.
+        context: The context data.
+
+    Returns:
+        dict: The response from the ASGI handler.
+    """
+    stage = get_stage(event)
+    asgi_handler = get_asgi_handler(stage, app)
+    try:
+        response = asgi_handler(event, context)
+        log_data = {
+            "stage": stage,
+            "statusCode": response.get("statusCode", None),
+            "root_path": app.root_path,
+            "response": response,
+            "event": event,
+        }
+        if response.get("statusCode") >= 400:
+            logger.error(json.dumps(log_data))
+        else:
+            logger.info(json.dumps(log_data))
+        return response
+    except Exception as e:
+        logger.exception("Error processing request.")
+        raise

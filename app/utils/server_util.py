@@ -1,9 +1,11 @@
 from PIL import Image
 import io
-from fastapi import HTTPException
+from fastapi import HTTPException, UploadFile, FastAPI
+from utils.config import get_env_variable
+from mangum import Mangum
 
 
-async def load_image_file(file):
+async def load_image_file(file: UploadFile):
     """
     Loads an image file from the given file object.
 
@@ -26,16 +28,30 @@ async def load_image_file(file):
             raise HTTPException(status_code=400, detail="Invalid image")
 
 
-def image_to_bytes(image):
+def get_asgi_handler(stage: str | None, app: FastAPI):
     """
-    Converts a PIL image to a byte array.
+    Get the ASGI handler for the API.
 
     Args:
-        image: The PIL image to be converted.
+        stage (str | None): The stage of the API.
 
     Returns:
-        The byte array representation of the image.
+        Mangum: The Mangum ASGI handler.
     """
-    img_byte_arr = io.BytesIO()
-    image.save(img_byte_arr, format="PNG")
-    return img_byte_arr
+    root_path = get_env_variable("ROOT_PATH", "ai-gen")
+    app.root_path = f"/{stage}/{root_path}" if stage else f"/{root_path}"
+    return Mangum(app, api_gateway_base_path=app.root_path)
+
+
+def get_stage(event):
+    """
+    Get the deployment stage of the API from the event data.
+
+    Args:
+        event: The event data.
+
+    Returns:
+        str | None: The stage of the API.
+    """
+    stage_variables = event.get("stageVariables", {})
+    return stage_variables.get("Stage", None) if stage_variables else None
