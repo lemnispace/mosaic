@@ -38,7 +38,7 @@ def get_asgi_handler(stage: str | None, app: FastAPI):
     Returns:
         Mangum: The Mangum ASGI handler.
     """
-    root_path = get_env_variable("ROOT_PATH", "ai-gen")
+    root_path = get_env_variable("ROOT_PATH", "gen/mosaic")
     app.root_path = f"/{stage}/{root_path}" if stage else f"/{root_path}"
     return Mangum(app, api_gateway_base_path=app.root_path)
 
