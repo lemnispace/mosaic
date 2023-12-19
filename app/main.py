@@ -58,6 +58,10 @@ async def mosaic(
     is_black_and_white: Optional[bool] = Form(
         True, description="Whether to generate a black and white mosaic"
     ),
+    contrast_factor: Optional[float] = Form(
+        1.5,
+        description="Factor to adjust the contrast of the image. A value of 1.0 means no change in contrast.",
+    ),
     file: UploadFile = File(..., description="Image to use for the mosaic"),
 ):
     img = await load_image_file(file)
@@ -69,6 +73,7 @@ async def mosaic(
         target_width=width,
         text_size=base_font_size,
         is_black_and_white=is_black_and_white,
+        contrast_factor=contrast_factor,
     )
     img_bytes = image_to_bytes(text_mosaic, format="PNG")
     img_bytes.seek(0)

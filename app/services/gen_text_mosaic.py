@@ -3,7 +3,12 @@ from utils.util import get_absolute_path, clean_text, get_charsize
 
 
 def gen_text_mosaic(
-    text: str, img: Image, target_width=3840, text_size=14, is_black_and_white=True
+    text: str,
+    img: Image,
+    target_width=3840,
+    text_size=14,
+    is_black_and_white=True,
+    contrast_factor=1.5,
 ):
     """
     Generate a text mosaic image by repeating the given text to fill the image.
@@ -13,6 +18,9 @@ def gen_text_mosaic(
         text (str): The text to be repeated in the text mosaic.
         img (PIL.Image.Image): The input image on which the text mosaic will be generated.
         target_width (int, optional): The desired width of the output image. Defaults to 3840.
+        text_size (int, optional): The size of the text in the text mosaic. Defaults to 14.
+        is_black_and_white (bool, optional): Whether to convert the image to black and white. Defaults to True.
+        contrast_factor (float, optional): The factor to adjust the contrast of the image. Defaults to 1.5.
 
     Returns:
         PIL.Image.Image: The generated text mosaic image.
@@ -23,7 +31,7 @@ def gen_text_mosaic(
 
     font = get_font(target_width, text_size)
     # Pre-process the image (apply edge enhancement)
-    image, txt_img = pre_process_img(img, is_black_and_white)
+    image, txt_img = pre_process_img(img, is_black_and_white, contrast_factor)
     # Create a drawing context for the text image
     draw = ImageDraw.Draw(txt_img)
     # Pre-process the text
@@ -36,8 +44,20 @@ def gen_text_mosaic(
 
 
 def get_font(img_width: int, default_font_size=14):
-    # determine the best font size based on the target image size
+    """
+    Get the font object based on the target image width.
+
+    Parameters:
+    img_width (int): The width of the target image.
+    default_font_size (int): The default font size.
+
+    Returns:
+    font (ImageFont): The font object.
+
+    """
     # we'll use resolution based scaling to determine the font size
+    if img_width >= 4320:
+        font_size = default_font_size * 4
     if img_width >= 2160:
         font_size = default_font_size * 3
     elif img_width >= 1080:
@@ -104,19 +124,22 @@ def pre_process_text(
 def pre_process_img(
     init_img,
     is_black_and_white=True,
+    contrast_factor=1.5,
 ):
     """
     Pre-processes the input image by applying an edge enhancement filter.
 
     Args:
         init_img (PIL.Image.Image): The input image to be pre-processed.
+        is_black_and_white (bool, optional): Flag indicating whether to convert the image to black and white. Defaults to True.
+        contrast_factor (float, optional): The factor by which to increase the contrast of the image. Defaults to 1.5.
 
     Returns:
         Tuple[PIL.Image.Image, PIL.Image.Image, PIL.Image.Image]: The pre-processed image, edge image, and text image.
     """
     # Convert to RGBA if necessary to ensure it's in the correct mode
     img = init_img.convert("RGBA")
-    img = increase_contrast(img)
+    img = increase_contrast(img, contrast_factor)
     if is_black_and_white:
         img = apply_black_and_white_filter(img)
     # Create a new image for the text overlay with a transparent background
@@ -125,18 +148,19 @@ def pre_process_img(
     return img, txt_img
 
 
-def increase_contrast(img: Image):
+def increase_contrast(img: Image, factor=1.5):
     """
     Increase the contrast of the image to make the subject more pronounced.
 
     Args:
         img (PIL.Image.Image): The input image.
+        factor (float, optional): The factor by which to increase the contrast. Default is 1.5.
 
     Returns:
         PIL.Image.Image: The image with increased contrast.
     """
     enhancer = ImageEnhance.Contrast(img)
-    return enhancer.enhance(1.5)
+    return enhancer.enhance(factor)
 
 
 def apply_black_and_white_filter(img: Image):
@@ -163,10 +187,12 @@ def gen_mosaic(
 
     Args:
         img (PIL.Image.Image): The input image.
-        edge_img (PIL.Image.Image): The image with edge detection applied.
         text (str): The text to be overlayed on the image.
         font (PIL.ImageFont.ImageFont): The font used for drawing the text.
         draw (PIL.ImageDraw.ImageDraw): The drawing context for the text image.
+
+    Returns:
+        None
     """
     char_width, char_height = get_charsize(font, draw)
     text_position = 0
