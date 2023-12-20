@@ -14,9 +14,9 @@ def clear_screen():
     os.system("cls" if os.name == "nt" else "clear")
 
 
-def run_command(command):
+def run_command(command, shell=False, text=False):
     # Run a subprocess command and check for errors
-    result = subprocess.run(command, shell=False)
+    result = subprocess.run(command, shell=shell, text=text)
     if result.returncode != 0:
         print(f"Error running command: {' '.join(command)}", file=sys.stderr)
         sys.exit(result.returncode)
