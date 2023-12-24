@@ -59,6 +59,8 @@ resource "aws_lambda_function" "TxtMosaicFunction" {
   runtime          = "python3.11"
   source_code_hash = data.archive_file.TxtMosaicFunction.output_base64sha256
   timeout          = 30
+  memory_size      = 512
+
   environment {
     variables = {
       ALLOWED_ORIGINS = var.allow_origins
