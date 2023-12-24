@@ -38,8 +38,8 @@ module "mosaic_route" {
 ### S3 Bucket for Lambda Function ###
 data "archive_file" "TxtMosaicFunction" {
   type        = "zip"
-  source_dir  = "${path.module}/../build/TxtMosaicFunction"
-  output_path = "${path.module}/../build/TxtMosaicFunction.zip"
+  source_dir  = "${path.module}/../.aws-sam/build/MosaicFunction"
+  output_path = "${path.module}/../.aws-sam/TxtMosaicFunction.zip"
 }
 
 resource "aws_s3_object" "mosaic_service" {
@@ -64,4 +64,12 @@ resource "aws_lambda_function" "TxtMosaicFunction" {
       ROOT_PATH       = var.root_path
     }
   }
+}
+
+resource "aws_lambda_permission" "mosaic_service" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.TxtMosaicFunction.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${data.terraform_remote_state.lemnispace_services.outputs.api_execution_arn}/*/*"
 }
