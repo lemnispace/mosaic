@@ -51,6 +51,7 @@ dist/
 *.dist-info/*
 *.dist/
 *.build/
+.aws-sam
 
 # OS
 .DS_Store
