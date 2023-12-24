@@ -1,0 +1,60 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  lemnispace-mosaic-services
+
+  SAM Template for the LemniSpace Mosaic Gen Service used only to generate build and local testing
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 512
+    # You can add LoggingConfig parameters such as the Logformat, Log Group, and SystemLogLevel or ApplicationLogLevel. Learn more here https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html#sam-function-loggingconfig.
+    LoggingConfig:
+      LogFormat: JSON
+
+Parameters:
+  StabilityAPIHost:
+    Type: String
+    Description: "Base URL for Stability API"
+    Default: "replace-me"
+  StabilityAPIHostGen:
+    Type: String
+    Description: "Base URL for Stability API for generating images"
+    Default: "replace-me"
+  StabilityAPIKey:
+    Type: String
+    Description: "API Key for Stability API"
+    Default: "api-key"
+  StageName:
+    Type: String
+    Description: "The deployment stage name (e.g., Dev, Stage, Prod)"
+    Default: ""
+  AllowOrigins:
+    Type: String
+    Description: "Comma-separated list of allowed origins for CORS"
+    Default: "*"
+
+Resources:
+  MosaicFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: ./app/
+      Handler: main.handler
+      Runtime: python3.11
+      Architectures:
+        - x86_64
+      Environment:
+        Variables:
+          STABILITY_API_HOST: !Ref StabilityAPIHost
+          STABILITY_API_HOST_GEN: !Ref StabilityAPIHostGen
+          STABILITY_API_KEY: !Ref StabilityAPIKey
+          ALLOWED_ORIGINS: !Ref AllowOrigins
+          ROOT_PATH: gen/mosaic
+      Events:
+        LemniSpaceGenService:
+          Type: HttpApi
+          Properties:
+            Path: /gen/mosaic/{proxy+}
+            Method: ANY
