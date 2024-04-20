@@ -56,17 +56,32 @@ def get_font(img_width: int, default_font_size=14):
 
     """
     # we'll use resolution based scaling to determine the font size
-    if img_width >= 4320:
+    if img_width >= 7200:
+        # Scaling for the largest width range
+        font_size = default_font_size * 4.5
+    elif img_width >= 4800:
+        # Scaling for large width range
         font_size = default_font_size * 4
-    if img_width >= 2160:
+    elif img_width >= 3600:
+        # Scaling for upper medium width range
+        font_size = default_font_size * 3.5
+    elif img_width >= 3300:
+        # Scaling for lower medium width range
         font_size = default_font_size * 3
+    elif img_width >= 2160:
+        # Scaling for small width range
+        font_size = default_font_size * 2
     elif img_width >= 1080:
+        # Scaling for very small width range
         font_size = default_font_size * 1.5
-    elif img_width <= 480:
-        font_size = default_font_size * 0.5
     elif img_width <= 720:
+        # Scaling for very tiny width range
         font_size = default_font_size * 0.75
+    elif img_width <= 480:
+        # Scaling for the smallest width range
+        font_size = default_font_size * 0.5
     else:
+        # Default font size if none of the above conditions are met (shouldn't happen, but just in case)
         font_size = default_font_size
     font_path = str(get_absolute_path("../fonts/NotoSansMono-Black.ttf"))
     font = ImageFont.truetype(font_path, int(font_size))
