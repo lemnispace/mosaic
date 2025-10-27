@@ -43,10 +43,13 @@ def main(func_name="TxtMosaicFunction"):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument
+    parser = argparse.ArgumentParser(
+        description="Build Lambda deployment package for the mosaic service"
+    )
     parser.add_argument(
-        "--lambda-name", default="TxtMosaicFunction", help="Name of the lambda function"
+        "--lambda-name",
+        default="TxtMosaicFunction",
+        help="Name of the lambda function",
     )
     args = parser.parse_args()
     main(args.lambda_name)

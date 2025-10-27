@@ -8,11 +8,12 @@ Description: >
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
-    Timeout: 30
-    MemorySize: 512
+    Timeout: 60
+    MemorySize: 1024
     # You can add LoggingConfig parameters such as the Logformat, Log Group, and SystemLogLevel or ApplicationLogLevel. Learn more here https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html#sam-function-loggingconfig.
     LoggingConfig:
       LogFormat: JSON
+    Tracing: Active
 
 Parameters:
   StabilityAPIHost:
@@ -52,6 +53,9 @@ Resources:
           STABILITY_API_KEY: !Ref StabilityAPIKey
           ALLOWED_ORIGINS: !Ref AllowOrigins
           ROOT_PATH: gen/mosaic
+          LOG_LEVEL: INFO
+          MAX_IMAGE_SIZE: "10485760"
+          MAX_IMAGE_DIMENSION: "10000"
       Events:
         LemniSpaceGenService:
           Type: HttpApi

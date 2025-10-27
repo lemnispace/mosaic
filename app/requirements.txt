@@ -1,7 +1,16 @@
-fastapi
-uvicorn[standard]
-Pillow
-numpy
-mangum
-python-dotenv
-python-multipart
+# Web framework and server
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+mangum==0.17.0
+
+# Image processing
+Pillow==10.2.0
+numpy==1.26.3
+
+# Utilities
+python-dotenv==1.0.1
+python-multipart==0.0.6
+
+# Note: To update dependencies, use:
+# pip install -U <package> && pip freeze > requirements.txt
+# Or use pip-tools: pip-compile requirements.in

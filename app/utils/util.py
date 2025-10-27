@@ -1,12 +1,25 @@
 from PIL import ImageFont, ImageDraw
 from PIL.Image import Image
 from pathlib import Path
+from typing import Tuple, Optional
 import re
 import io
 
 
-def get_absolute_path(relative_path: str, base_path: Path = None):
-    """Returns the absolute path of a file given its relative path."""
+def get_absolute_path(relative_path: str, base_path: Optional[Path] = None) -> Path:
+    """
+    Returns the absolute path of a file given its relative path.
+
+    Args:
+        relative_path: Path relative to base_path.
+        base_path: Base directory for resolving relative path. Defaults to this file's directory.
+
+    Returns:
+        Resolved absolute path.
+
+    Raises:
+        FileNotFoundError: If the file does not exist.
+    """
     if base_path is None:
         base_path = Path(__file__).parent
     abs_path = base_path / relative_path
@@ -18,13 +31,13 @@ def get_absolute_path(relative_path: str, base_path: Path = None):
 
 def clean_text(text: str) -> str:
     """
-    Cleans the given text by removing extra whitespace, newlines, and tabs
+    Cleans the given text by removing extra whitespace, newlines, and tabs.
 
     Args:
-        text (str): The text to be cleaned.
+        text: The text to be cleaned.
 
     Returns:
-        str: The cleaned text.
+        The cleaned text with normalized whitespace.
     """
     return re.sub(r"\s+", " ", text).strip()
 
@@ -33,17 +46,17 @@ def get_charsize(
     font: ImageFont.FreeTypeFont,
     draw: ImageDraw.ImageDraw,
     char: str = "A",
-):
+) -> Tuple[int, int]:
     """
-    Calculate the width and height of a character.
+    Calculate the width and height of a character in pixels.
 
     Args:
-        char (str): The character to measure.
-        font (ImageFont.FreeTypeFont): The font used to draw the character.
-        draw (ImageDraw.ImageDraw): The drawing context.
+        font: The font used to draw the character.
+        draw: The drawing context.
+        char: The character to measure (default: 'A').
 
     Returns:
-        Tuple[int, int]: The width and height of the character.
+        Tuple of (width, height) in pixels.
     """
     char_size = draw.textbbox((0, 0), char, font=font)
     char_width = char_size[2] - char_size[0]
@@ -51,15 +64,16 @@ def get_charsize(
     return char_width, char_height
 
 
-def image_to_bytes(image: Image, format: str = "PNG"):
+def image_to_bytes(image: Image, format: str = "PNG") -> io.BytesIO:
     """
-    Converts a PIL image to a byte array.
+    Converts a PIL image to a byte stream.
 
     Args:
         image: The PIL image to be converted.
+        format: The image format (e.g., 'PNG', 'JPEG').
 
     Returns:
-        The byte array representation of the image.
+        BytesIO object containing the image data.
     """
     img_byte_arr = io.BytesIO()
     image.save(img_byte_arr, format=format)
