@@ -44,6 +44,7 @@
         "ms-toolsai.vscode-jupyter-slideshow",
         "DavidAnson.vscode-markdownlint",
         "ms-python.vscode-pylance",
+        "ms-python.debugpy",
         "hashicorp.terraform"
       ],
       "settings": {
